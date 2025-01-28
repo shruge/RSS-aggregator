@@ -1,0 +1,12 @@
+name: lint
+on: push
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: install deps
+        uses: actions/checkout@v4
+      - run: make install
+      - name: lint code
+        run: make lint
