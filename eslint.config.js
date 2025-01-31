@@ -18,7 +18,7 @@ export default [
   {
     languageOptions: {
       globals: {
-        ...globals.node,
+        ...globals.browser,
         ...globals.jest,
       },
       parserOptions: {
