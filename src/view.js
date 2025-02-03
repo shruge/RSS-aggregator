@@ -22,37 +22,49 @@ const genLi = () => {
 
   return li;
 };
-const changeFormState = (state) => {
+const updateFeedback = (text, errorType, btn, input, feedbackEl) => {
+  btn.removeAttribute('disabled');
+  
+  input.removeAttribute('readonly');
+  input.classList.toggle('is-invalid', errorType === 'invalid');
+
+  feedbackEl.textContent = text;
+  feedbackEl.classList.toggle('text-danger', errorType !== 'noError');
+  feedbackEl.classList.toggle('text-success', errorType === 'noError');
+}
+const changeFormState = (formState, t) => {
+  const input = document.querySelector('#url-input');
   const btn = document.querySelector('.rss-form button');
-  const input = document.querySelector('input[name="url"]');
-
-  if (state.formState === 'sending') {
-    btn.setAttribute('disabled', true);
-    input.setAttribute('readonly', true);
-  } else {
-    if (!state.error.length) input.value = '';
-
-    btn.removeAttribute('disabled');
-    input.removeAttribute('readonly');
-  }
-};
-const displayFeedback = (text) => {
   const feedbackEl = document.querySelector('.feedback');
+  
+  switch(formState) {
+    case 'sending':
+      feedbackEl.textContent = '';
 
-  if (text.length) {
-    if (!feedbackEl.classList.contains('text-danger')) {
-      feedbackEl.classList.remove('text-success');
-      feedbackEl.classList.add('text-danger');
-    }
+      btn.setAttribute('disabled', true);
+    
+      input.setAttribute('readonly', true);
+      input.classList.remove('is-invalid');
+      break;
+    case 'invalid':
+      updateFeedback(t('errors.invalid'), 'invalid', btn, input, feedbackEl);
+      break;
+    case 'success':
+      input.value = '';
 
-    feedbackEl.textContent = text;
-  } else {
-    if (!feedbackEl.classList.contains('text-success')) {
-      feedbackEl.classList.remove('text-danger');
-      feedbackEl.classList.add('text-success');
-    }
-
-    feedbackEl.textContent = 'RSS успешно загружен';
+      updateFeedback(t('errors.success'), 'noError', btn, input, feedbackEl);
+      break;
+    case 'networkError':
+      updateFeedback(t('errors.network'), 'error', btn, input, feedbackEl);
+      break;
+    case 'noRss':
+      updateFeedback(t('errors.noRss'), 'error', btn, input, feedbackEl);
+      break;
+    case 'alreadyExist':
+      updateFeedback(t('errors.alreadyExist'), 'error', btn, input, feedbackEl);
+      break;
+    default:
+      throw new Error(`Invalid formState: ${formState}`);
   }
 };
 const genCard = (title) => {
@@ -71,14 +83,14 @@ const genCard = (title) => {
 
   return card;
 };
-const genPosts = (posts) => {
+const genPosts = (posts, t) => {
   const postsContainer = document.querySelector('.posts');
-  const postsCard = genCard('Посты');
+  const postsCard = genCard(t('mainContent.postsTitle'));
   const list = genList();
 
   posts.forEach((post) => {
     const link = document.createElement('a');
-    const btn = genBtn('Просмотр');
+    const btn = genBtn(t('mainContent.button'));
     const item = genLi();
 
     btn.classList.add('btn-outline-primary', 'btn-sm');
@@ -101,9 +113,9 @@ const genPosts = (posts) => {
   postsContainer.innerHTML = '';
   postsContainer.append(postsCard);
 };
-const genFeed = (feed) => {
+const genFeed = (feed, t) => {
   const feedContainer = document.querySelector('.feeds');
-  const feedCard = genCard('Фиды');
+  const feedCard = genCard(t('mainContent.feedTitle'));
   const list = genList();
 
   feed.forEach((feedItem) => {
@@ -125,24 +137,19 @@ const genFeed = (feed) => {
 
   feedContainer.innerHTML = '';
   feedContainer.append(feedCard);
-
-  displayFeedback('');
 };
 
-const genStateWatcher = (state) => {
+const genStateWatcher = (state, t) => {
   const stateWatcher = onChange(state, (path) => {
     switch (path) {
       case 'posts':
-        genPosts(state.posts);
+        genPosts(state.posts, t);
         break;
       case 'feed':
-        genFeed(state.feed);
-        break;
-      case 'error':
-        displayFeedback(state.error);
+        genFeed(state.feed, t);
         break;
       case 'formState':
-        changeFormState(state);
+        changeFormState(state.formState, t);
         break;
       default: break;
     }
