@@ -11,7 +11,7 @@ const app = (t) => {
     },
     string: {
       url: 'invalid',
-    }
+    },
   });
 
   const state = {
@@ -28,7 +28,7 @@ const app = (t) => {
   // const rssExample = document.querySelector('.text-muted');
   // const label = document.querySelector('label[for="url-input"]');
   // const addBtn = document.querySelector('button[type="submit"]');
- 
+
   // const renderText = () => {
   //   title.textContent = t('form.title');
   //   descr.textContent = t('form.descr');
@@ -41,53 +41,58 @@ const app = (t) => {
     const xmlDoc = parse(data);
     const stateWatcher = genStateWatcher(state, t);
     const feedItem = getFeedItem(xmlDoc);
-  
+
     //   if (findFeed(state.feed, feedItem) === -1) {
     const posts = getPosts(xmlDoc);
-  
+
     state.links.push(link);
     stateWatcher.feed.push(feedItem);
     stateWatcher.posts = posts.map((post) => post);
     //   } else stateWatcher.formState = 'alreadyExist';
-  
+
     stateWatcher.formState = 'success';
   };
   const getDataContents = (link) => {
-      const stateWatcher = genStateWatcher(state, t);
-  
-      getData(link)
-        .then((data) => {
-          const { content_type } = data.status;
+    const stateWatcher = genStateWatcher(state, t);
 
-          if (data.contents && content_type && content_type.includes('xml')) {
-            console.log(data);
-            
-            updateState(link, data.contents);
-          } else stateWatcher.formState = 'noRss';
-        })
-        .catch(() => stateWatcher.formState = 'networkError');
+    getData(link)
+      .then((data) => {
+        console.log(data);
+        const { content_type: contentType } = data.status;
+
+        if (data.contents && contentType && contentType.includes('xml')) {
+          updateState(link, data.contents);
+        } else stateWatcher.formState = 'noRss';
+      })
+      .catch(() => {
+        stateWatcher.formState = 'networkError';
+      });
   };
   const validateLink = (link) => {
     const stateWatcher = genStateWatcher(state, t);
-  
+
     stateWatcher.formState = 'sending';
 
     const linkScheme = yup.string()
       .url().required()
       .notOneOf(state.links);
-  
+
     linkScheme.validate(link)
-      .then(() => getDataContents(link))
-      .catch((err) => stateWatcher.formState = err.message);
+      .then(() => {
+        getDataContents(link);
+      })
+      .catch((err) => {
+        stateWatcher.formState = err.message;
+      });
   };
-    
+
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-  
+
     const formData = new FormData(form);
-  
+
     validateLink(formData.get('url'));
   });
-}
+};
 
 export default app;

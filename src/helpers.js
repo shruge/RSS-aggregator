@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 const getTextContent = (node) => node.textContent.trim();
 
 // export const findFeed = (feeds, targetFeed) => (
@@ -19,9 +21,9 @@ export const getData = (link) => {
   });
 
   return Promise.race([
-    fetch(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}`)
+    axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(link)}`)
       .then((res) => {
-        if (res.ok) { return res.json(); }
+        if (res.status >= 200 && res.status < 300) { return res.data; }
         throw new Error('Ошибка сети');
       }),
     errorTimeout,

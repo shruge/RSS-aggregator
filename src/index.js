@@ -9,13 +9,13 @@ i18next.createInstance({
   lng: 'ru',
   resources: {
     en: { translation: en },
-    ru: { translation: ru }
-  }
+    ru: { translation: ru },
+  },
 }, (err, t) => {
   if (err) {
     console.log(err);
     return;
   }
 
-  app(t)
+  app(t);
 });

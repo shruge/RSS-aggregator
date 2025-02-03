@@ -22,46 +22,54 @@ const genLi = () => {
 
   return li;
 };
-const updateFeedback = (text, errorType, btn, input, feedbackEl) => {
+const updateFeedback = (errorType, btn, input, feedbackEl) => {
   btn.removeAttribute('disabled');
-  
+
   input.removeAttribute('readonly');
   input.classList.toggle('is-invalid', errorType === 'invalid');
 
-  feedbackEl.textContent = text;
   feedbackEl.classList.toggle('text-danger', errorType !== 'noError');
   feedbackEl.classList.toggle('text-success', errorType === 'noError');
-}
+};
 const changeFormState = (formState, t) => {
   const input = document.querySelector('#url-input');
   const btn = document.querySelector('.rss-form button');
   const feedbackEl = document.querySelector('.feedback');
-  
-  switch(formState) {
+
+  switch (formState) {
     case 'sending':
       feedbackEl.textContent = '';
 
       btn.setAttribute('disabled', true);
-    
+
       input.setAttribute('readonly', true);
       input.classList.remove('is-invalid');
       break;
     case 'invalid':
-      updateFeedback(t('errors.invalid'), 'invalid', btn, input, feedbackEl);
+      feedbackEl.textContent = t('errors.invalid');
+
+      updateFeedback('invalid', btn, input, feedbackEl);
       break;
     case 'success':
       input.value = '';
+      feedbackEl.textContent = t('errors.success');
 
-      updateFeedback(t('errors.success'), 'noError', btn, input, feedbackEl);
+      updateFeedback('noError', btn, input, feedbackEl);
       break;
     case 'networkError':
-      updateFeedback(t('errors.network'), 'error', btn, input, feedbackEl);
+      feedbackEl.textContent = t('errors.network');
+
+      updateFeedback('error', btn, input, feedbackEl);
       break;
     case 'noRss':
-      updateFeedback(t('errors.noRss'), 'error', btn, input, feedbackEl);
+      feedbackEl.textContent = t('errors.noRss');
+
+      updateFeedback('error', btn, input, feedbackEl);
       break;
     case 'alreadyExist':
-      updateFeedback(t('errors.alreadyExist'), 'error', btn, input, feedbackEl);
+      feedbackEl.textContent = t('errors.alreadyExist');
+
+      updateFeedback('error', btn, input, feedbackEl);
       break;
     default:
       throw new Error(`Invalid formState: ${formState}`);
