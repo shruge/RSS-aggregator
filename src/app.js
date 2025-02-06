@@ -1,7 +1,9 @@
 import * as yup from 'yup';
 import genStateWatcher from './view.js';
 import {
-  getData, getFeedItem, getPosts, parse,
+  checkForXmlData,
+  findNewPosts,
+  getData, parse,
 } from './helpers.js';
 
 const app = (t) => {
@@ -22,52 +24,77 @@ const app = (t) => {
     visitedPostsId: [],
   };
   const form = document.querySelector('form');
-  // const title = document.querySelector('h1');
-  // const input = document.querySelector('#url-input');
-  // const descr = document.querySelector('h1 + .lead');
-  // const rssExample = document.querySelector('.text-muted');
-  // const label = document.querySelector('label[for="url-input"]');
-  // const addBtn = document.querySelector('button[type="submit"]');
 
-  // const renderText = () => {
-  //   title.textContent = t('form.title');
-  //   descr.textContent = t('form.descr');
-  //   addBtn.textContent = t('form.button');
-  //   label.textContent = t('form.placeholder');
-  //   rssExample.textContent = t('form.example');
-  //   input.setAttribute('placeholder', t('form.placeholder'));
-  // }
-  const updateState = (link, data) => {
-    const xmlDoc = parse(data);
+  const updatePosts = () => {
     const stateWatcher = genStateWatcher(state, t);
-    const feedItem = getFeedItem(xmlDoc);
+    const { links } = stateWatcher;
+    const promises = links.map((link) => (
+      getData(link)
+        .then((res) => res)
+        .catch((err) => {
+          const errObj = {
+            status: 'сеть не надежна',
+            msg: err.message,
+          };
 
-    //   if (findFeed(state.feed, feedItem) === -1) {
-    const posts = getPosts(xmlDoc);
+          console.error(errObj.msg);
+          return errObj;
+        })
+    ));
 
-    state.links.push(link);
-    stateWatcher.feed.push(feedItem);
-    stateWatcher.posts = posts.map((post) => post);
-    //   } else stateWatcher.formState = 'alreadyExist';
+    Promise.all(promises)
+      .then((res) => {
+        console.log(res);
 
-    stateWatcher.formState = 'success';
+        res.forEach((data) => {
+          const content = checkForXmlData(data);
+
+          if (content) {
+            const { posts } = parse(content);
+            const newPosts = findNewPosts(stateWatcher.posts, posts);
+
+            if (newPosts.length) stateWatcher.posts = newPosts.concat(stateWatcher.posts);
+          }
+        });
+      })
+      .finally(() => {
+        setTimeout(() => {
+          updatePosts();
+        }, 5000);
+      });
   };
+
+  const updateState = (link, data) => {
+    const { feed, posts } = parse(data);
+    const stateWatcher = genStateWatcher(state, t);
+
+    stateWatcher.links.push(link);
+    stateWatcher.feed.push(feed);
+    stateWatcher.formState = 'success';
+    stateWatcher.posts = posts.concat(stateWatcher.posts);
+
+    if (stateWatcher.links.length === 1) {
+      setTimeout(() => {
+        updatePosts();
+      }, 5000);
+    }
+  };
+
   const getDataContents = (link) => {
     const stateWatcher = genStateWatcher(state, t);
 
     getData(link)
       .then((data) => {
-        console.log(data);
-        const { content_type: contentType } = data.status;
+        const contents = checkForXmlData(data);
 
-        if (data.contents && contentType && contentType.includes('xml')) {
-          updateState(link, data.contents);
-        } else stateWatcher.formState = 'noRss';
+        if (contents) updateState(link, contents);
+        else stateWatcher.formState = 'noRss';
       })
       .catch(() => {
         stateWatcher.formState = 'networkError';
       });
   };
+
   const validateLink = (link) => {
     const stateWatcher = genStateWatcher(state, t);
 
