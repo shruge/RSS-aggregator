@@ -2,9 +2,9 @@ import axios from 'axios';
 
 const getTextContent = (node) => node.textContent.trim();
 
-export const findFeed = (feeds, targetFeed) => (
-  feeds.findIndex(({ title }) => title === targetFeed.title)
-);
+// export const findFeed = (feeds, targetFeed) => (
+//   feeds.findIndex(({ title }) => title === targetFeed.title)
+// );
 export const findNewPosts = (prevPosts, newPosts) => (
   newPosts.filter(({ link: newPostLink }) => (
     !prevPosts.some(({ link: prevPostLink }) => (
@@ -12,6 +12,7 @@ export const findNewPosts = (prevPosts, newPosts) => (
     ))
   ))
 );
+
 export const checkForXmlData = (data) => {
   const { content_type: contentType } = data.status || {};
 
@@ -19,24 +20,12 @@ export const checkForXmlData = (data) => {
 
   return null;
 };
-export const getData = (link) => {
-  const errorTimeout = new Promise((_, rej) => {
-    setTimeout(() => rej(new Error('Ошибка сети')), 10000);
-  });
 
-  return Promise.race([
-    axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(link)}`)
-      .then((res) => {
-        if (res.status >= 200 && res.status < 300) { return res.data; }
-        throw new Error('Не удалось получить ответ');
-      }),
-    errorTimeout,
-  ]);
-};
 export const getFeed = (xmlDoc) => ({
   title: getTextContent(xmlDoc.querySelector('title')),
   descr: getTextContent(xmlDoc.querySelector('description')),
 });
+
 export const getPosts = (xmlDoc) => {
   const posts = [];
 
@@ -64,6 +53,7 @@ export const getPosts = (xmlDoc) => {
 
   return posts;
 };
+
 export const parse = (rssData) => {
   const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(rssData, 'application/xml');
@@ -71,4 +61,19 @@ export const parse = (rssData) => {
   const feed = getFeed(xmlDoc);
 
   return { feed, posts };
+};
+
+export const getData = (link) => {
+  const errorTimeout = new Promise((_, rej) => {
+    setTimeout(() => rej(new Error('Ошибка сети')), 10000);
+  });
+
+  return Promise.race([
+    axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(link)}`)
+      .then((res) => {
+        if (res.status >= 200 && res.status < 300) { return res.data; }
+        throw new Error('Не удалось получить ответ');
+      }),
+    errorTimeout,
+  ]);
 };

@@ -8,7 +8,7 @@
   },
   "errors": {
     "success": "RSS successfully loaded",
-    "network": "Network error",
+    "networkError": "Network error",
     "invalid": "The link must be a valid URL",
     "noRss": "The resource does not contain valid RSS",
     "alreadyExist": "RSS already exists"

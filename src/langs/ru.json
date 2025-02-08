@@ -8,7 +8,7 @@
   },
   "errors": {
     "success": "RSS успешно загружен",
-    "network": "Ошибка сети",
+    "networkError": "Ошибка сети",
     "invalid": "Ссылка должна быть валидным URL",
     "noRss": "Ресурс не содержит валидный RSS",
     "alreadyExist": "RSS уже существует"
