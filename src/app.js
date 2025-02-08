@@ -9,6 +9,7 @@ import {
 const app = (t) => {
   yup.setLocale({
     mixed: {
+      required: 'empty',
       notOneOf: 'alreadyExist',
     },
     string: {

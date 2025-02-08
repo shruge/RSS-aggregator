@@ -44,6 +44,7 @@ const changeFormState = (formState, t) => {
       input.classList.remove('is-invalid');
       break;
     case 'invalid':
+    case 'empty':
       updateFeedback(btn, input, feedbackEl, 'invalid');
       break;
     case 'success':

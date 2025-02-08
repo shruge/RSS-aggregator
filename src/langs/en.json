@@ -11,6 +11,7 @@
     "networkError": "Network error",
     "invalid": "The link must be a valid URL",
     "noRss": "The resource does not contain valid RSS",
+    "empty": "Shouldn't be empty",
     "alreadyExist": "RSS already exists"
   },
   "modal": {
