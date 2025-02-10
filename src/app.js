@@ -1,21 +1,21 @@
 import * as yup from 'yup';
 import genStateWatcher from './view.js';
-import { setPostHandlers } from './utils/helpers.js';
+import { setPostHandler } from './utils/helpers.js';
 import {
-  checkForXmlData, getData, parse, updatePosts,
+  getData, parse, updatePosts,
 } from './utils/asyncHelpers.js';
 
-yup.setLocale({
-  mixed: {
-    required: 'empty',
-    notOneOf: 'alreadyExist',
-  },
-  string: {
-    url: 'invalid',
-  },
-});
-
 const app = (t) => {
+  yup.setLocale({
+    mixed: {
+      required: 'empty',
+      notOneOf: 'alreadyExist',
+    },
+    string: {
+      url: 'invalid',
+    },
+  });
+
   const state = {
     formState: 'filling',
     feed: [],
@@ -31,22 +31,20 @@ const app = (t) => {
   const stateWatcher = genStateWatcher(state, t);
   const form = document.querySelector('form');
 
-  const updateState = (link, data) => {
-    const { feed, posts } = parse(data);
+  const updateState = (link, parsedData) => {
+    const { feed, posts } = parsedData;
 
     state.links.push(link);
     stateWatcher.feed.push(feed);
     stateWatcher.formState = 'success';
     stateWatcher.posts = posts.concat(stateWatcher.posts);
-
-    setPostHandlers(stateWatcher);
   };
 
   const getDataContents = (link) => {
     getData(link).then((data) => {
-      const contents = checkForXmlData(data);
+      const parseData = parse(data);
 
-      if (contents) updateState(link, contents);
+      if (parseData) updateState(link, parseData);
     })
       .catch((err) => {
         console.error(t(`errors.${err.message}`));
@@ -76,7 +74,8 @@ const app = (t) => {
     checkLinkAndFetch(formData.get('url'));
   });
 
-  updatePosts(stateWatcher, t);
+  updatePosts(genStateWatcher, state, t);
+  setPostHandler(stateWatcher);
 };
 
 export default app;

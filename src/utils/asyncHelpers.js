@@ -1,24 +1,20 @@
 import axios from 'axios';
 import {
-  findNewPosts, getFeed, getPosts, setPostHandlers,
+  findNewPosts, getFeed, getPosts,
 } from './helpers.js';
 
-export const parse = (rssData) => {
+export const parse = (data) => {
   const parser = new DOMParser();
-  const xmlDoc = parser.parseFromString(rssData, 'application/xml');
-  const posts = getPosts(xmlDoc);
-  const feed = getFeed(xmlDoc);
+  const xmlDoc = parser.parseFromString(data.contents, 'application/xml');
+  const parseError = xmlDoc.querySelector('parsererror');
 
-  return { feed, posts };
-};
+  if (!parseError) {
+    const posts = getPosts(xmlDoc);
+    const feed = getFeed(xmlDoc);
 
-export const checkForXmlData = (data) => {
-  const { content_type: contentType } = data.status || {};
-
-  if (data.contents.includes('rss version') || (contentType && contentType.includes('xml'))) {
-    return data.contents;
+    return { feed, posts };
   }
-  console.log(data.contents);
+
   throw new Error('noRss');
 };
 
@@ -39,9 +35,9 @@ export const getData = (link) => {
   ]);
 };
 
-export const updatePosts = (stateWatcher, t) => {
-  const state = stateWatcher;
-  const { links, posts: prevPosts } = state;
+export const updatePosts = (genState, state, t) => {
+  const stateWatcher = genState(state, t);
+  const { links, posts: prevPosts } = stateWatcher;
   const postsUpdateDelay = 5000;
   const promises = links.map((link) => (
     getData(link).then((res) => res).catch((err) => {
@@ -57,24 +53,16 @@ export const updatePosts = (stateWatcher, t) => {
 
   Promise.all(promises).then((res) => {
     res.forEach((data) => {
-      const content = checkForXmlData(data);
+      const { posts: newPostsParse } = parse(data);
+      const newPosts = findNewPosts(prevPosts, newPostsParse);
 
-      if (content) {
-        const { posts: newPostsParse } = parse(content);
-        const newPosts = findNewPosts(prevPosts, newPostsParse);
-
-        if (newPosts.length) {
-          state.posts = newPosts.concat(prevPosts);
-
-          setPostHandlers(state);
-        }
-      }
+      if (newPosts.length) stateWatcher.posts = newPosts.concat(prevPosts);
     });
   }).catch((err) => {
     console.error(t(`errors.${err.message}`));
   }).finally(() => {
     setTimeout(() => {
-      updatePosts(state, t);
+      updatePosts(genState, state, t);
     }, postsUpdateDelay);
   });
 };

@@ -1,5 +1,7 @@
 const getTextContent = (node) => node.textContent.trim();
 
+const findPost = (findId, posts) => posts.find(({ id }) => findId === id);
+
 export const findNewPosts = (prevPosts, newPosts) => (
   newPosts.filter(({ link: newPostLink }) => (
     !prevPosts.some(({ link: prevPostLink }) => (
@@ -51,25 +53,29 @@ export const getPosts = (xmlDoc) => {
   return posts;
 };
 
-export const setPostHandlers = (stateWatcher) => {
-  const { posts, modal, visitedPostsId } = stateWatcher;
+export const setPostHandler = (stateWatcher) => {
+  document.querySelector('.posts').addEventListener('click', (e) => {
+    const { posts, modal, visitedPostsId } = stateWatcher;
+    const elem = e.target;
+    const { id } = elem.dataset;
+    const clickedPost = findPost(id, posts);
 
-  posts.forEach(({
-    id, title, descr, link,
-  }) => {
-    const btnEl = document.querySelector(`button[data-id="${id}"]`);
-    const linkEl = document.querySelector(`a[data-id="${id}"]`);
-
-    linkEl.addEventListener('click', () => {
-      visitedPostsId.push(id);
-    });
-    btnEl.addEventListener('click', () => {
+    if (clickedPost) {
+      const { title, descr, link } = clickedPost;
       const text = descr.replace(/<(\/?[^>]+)>/g, '');
 
-      modal.descr = text;
-      modal.title = title;
-      modal.link = link;
-      visitedPostsId.push(id);
-    });
+      switch (elem.nodeName) {
+        case 'A':
+          visitedPostsId.push(id);
+          break;
+        case 'BUTTON':
+          modal.descr = text;
+          modal.title = title;
+          modal.link = link;
+          visitedPostsId.push(id);
+          break;
+        default: break;
+      }
+    }
   });
 };
