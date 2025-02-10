@@ -15,10 +15,10 @@ export const parse = (rssData) => {
 export const checkForXmlData = (data) => {
   const { content_type: contentType } = data.status || {};
 
-  if (data.contents && contentType && contentType.includes('xml')) {
+  if (data.contents.includes('rss version') || (contentType && contentType.includes('xml'))) {
     return data.contents;
   }
-  console.log(data);
+  console.log(data.contents);
   throw new Error('noRss');
 };
 
@@ -32,6 +32,8 @@ export const getData = (link) => {
       .then((res) => {
         if (res.status >= 200 && res.status < 300) { return res.data; }
         throw new Error('noResponse');
+      }).catch(() => {
+        throw new Error('networkError');
       }),
     errorTimeout,
   ]);

@@ -1,6 +1,6 @@
 [![hexlet-check](https://github.com/shruge/frontend-project-11/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/shruge/frontend-project-11/actions/workflows/hexlet-check.yml)
 
-[![Maintainability](https://api.codeclimate.com/v1/badges/5bdb45fb87e7cde28d93/maintainability)](https://codeclimate.com/github/shruge/frontend-project-11/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/5bdb45fb87e7cde28d93/test_coverage)](https://codeclimate.com/github/shruge/frontend-project-11/test_coverage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/5bdb45fb87e7cde28d93/maintainability)](https://codeclimate.com/github/shruge/frontend-project-11/maintainability)
 
 <a href="https://frontend-project-11-rosy-xi.vercel.app/">Сайт</a>
 
