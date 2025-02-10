@@ -1,26 +1,27 @@
 {
   "form": {
-    "title": "RSS aggregator",
-    "descr": "Start reading RSS today! It's easy, it's beautiful.",
     "button": "Add",
+    "title": "RSS aggregator",
     "placeholder": "RSS link",
-    "example": "Example: https://lorem-rss.hexlet.app/feed"
+    "example": "Example: https://lorem-rss.hexlet.app/feed",
+    "descr": "Start reading RSS today! It's easy, it's beautiful."
   },
   "errors": {
-    "success": "RSS successfully loaded",
-    "networkError": "Network error",
-    "invalid": "The link must be a valid URL",
-    "noRss": "The resource does not contain valid RSS",
     "empty": "Shouldn't be empty",
-    "alreadyExist": "RSS already exists"
+    "networkError": "Network error",
+    "success": "RSS successfully loaded",
+    "alreadyExist": "RSS already exists",
+    "noResponse": "Failed to get a response",
+    "invalid": "The link must be a valid URL",
+    "noRss": "The resource does not contain valid RSS"
   },
   "modal": {
-    "readMore": "Read more",
-    "close": "Close"
+    "close": "Close",
+    "readMore": "Read more"
   },
   "mainContent": {
     "button": "Preview",
-    "postsTitle": "Posts",
-    "feedTitle": "Feeds"
+    "feedTitle": "Feeds",
+    "postsTitle": "Posts"
   }
 }

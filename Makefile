@@ -4,6 +4,9 @@ install:
 build:
 	npm run build
 
+serve:
+	npm run serve
+
 lint:
 	npx eslint .
 

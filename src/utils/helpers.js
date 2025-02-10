@@ -1,10 +1,5 @@
-import axios from 'axios';
-
 const getTextContent = (node) => node.textContent.trim();
 
-// export const findFeed = (feeds, targetFeed) => (
-//   feeds.findIndex(({ title }) => title === targetFeed.title)
-// );
 export const findNewPosts = (prevPosts, newPosts) => (
   newPosts.filter(({ link: newPostLink }) => (
     !prevPosts.some(({ link: prevPostLink }) => (
@@ -13,18 +8,20 @@ export const findNewPosts = (prevPosts, newPosts) => (
   ))
 );
 
-export const checkForXmlData = (data) => {
-  const { content_type: contentType } = data.status || {};
-
-  if (data.contents && contentType && contentType.includes('xml')) return data.contents;
-
-  return null;
-};
-
 export const getFeed = (xmlDoc) => ({
   title: getTextContent(xmlDoc.querySelector('title')),
   descr: getTextContent(xmlDoc.querySelector('description')),
 });
+
+export const updateFeedback = (btn, input, feedbackEl, errorType = 'error') => {
+  btn.removeAttribute('disabled');
+
+  input.removeAttribute('readonly');
+  input.classList.toggle('is-invalid', errorType === 'invalid');
+
+  feedbackEl.classList.toggle('text-danger', errorType !== 'noError');
+  feedbackEl.classList.toggle('text-success', errorType === 'noError');
+};
 
 export const getPosts = (xmlDoc) => {
   const posts = [];
@@ -54,26 +51,25 @@ export const getPosts = (xmlDoc) => {
   return posts;
 };
 
-export const parse = (rssData) => {
-  const parser = new DOMParser();
-  const xmlDoc = parser.parseFromString(rssData, 'application/xml');
-  const posts = getPosts(xmlDoc);
-  const feed = getFeed(xmlDoc);
+export const setPostHandlers = (stateWatcher) => {
+  const { posts, modal, visitedPostsId } = stateWatcher;
 
-  return { feed, posts };
-};
+  posts.forEach(({
+    id, title, descr, link,
+  }) => {
+    const btnEl = document.querySelector(`button[data-id="${id}"]`);
+    const linkEl = document.querySelector(`a[data-id="${id}"]`);
 
-export const getData = (link) => {
-  const errorTimeout = new Promise((_, rej) => {
-    setTimeout(() => rej(new Error('Ошибка сети')), 10000);
+    linkEl.addEventListener('click', () => {
+      visitedPostsId.push(id);
+    });
+    btnEl.addEventListener('click', () => {
+      const text = descr.replace(/<(\/?[^>]+)>/g, '');
+
+      modal.descr = text;
+      modal.title = title;
+      modal.link = link;
+      visitedPostsId.push(id);
+    });
   });
-
-  return Promise.race([
-    axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(link)}`)
-      .then((res) => {
-        if (res.status >= 200 && res.status < 300) { return res.data; }
-        throw new Error('Не удалось получить ответ');
-      }),
-    errorTimeout,
-  ]);
 };

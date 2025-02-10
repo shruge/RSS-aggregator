@@ -1,22 +1,21 @@
 import * as yup from 'yup';
 import genStateWatcher from './view.js';
+import { setPostHandlers } from './utils/helpers.js';
 import {
-  checkForXmlData,
-  findNewPosts,
-  getData, parse,
-} from './helpers.js';
+  checkForXmlData, getData, parse, updatePosts,
+} from './utils/asyncHelpers.js';
+
+yup.setLocale({
+  mixed: {
+    required: 'empty',
+    notOneOf: 'alreadyExist',
+  },
+  string: {
+    url: 'invalid',
+  },
+});
 
 const app = (t) => {
-  yup.setLocale({
-    mixed: {
-      required: 'empty',
-      notOneOf: 'alreadyExist',
-    },
-    string: {
-      url: 'invalid',
-    },
-  });
-
   const state = {
     formState: 'filling',
     feed: [],
@@ -29,75 +28,33 @@ const app = (t) => {
       descr: '',
     },
   };
+  const stateWatcher = genStateWatcher(state, t);
   const form = document.querySelector('form');
-
-  const updatePosts = () => {
-    const stateWatcher = genStateWatcher(state, t);
-    const { links } = stateWatcher;
-    const promises = links.map((link) => (
-      getData(link).then((res) => res).catch((err) => {
-        const errObj = {
-          status: 'сеть не надежна',
-          msg: err.message,
-        };
-
-        console.error(errObj.msg);
-        return errObj;
-      })
-    ));
-
-    Promise.all(promises).then((res) => {
-      res.forEach((data) => {
-        const content = checkForXmlData(data);
-
-        if (content) {
-          const { posts } = parse(content);
-          const newPosts = findNewPosts(stateWatcher.posts, posts);
-
-          if (newPosts.length) stateWatcher.posts = newPosts.concat(stateWatcher.posts);
-        }
-      });
-    })
-      .finally(() => {
-        setTimeout(() => {
-          updatePosts();
-        }, 5000);
-      });
-  };
 
   const updateState = (link, data) => {
     const { feed, posts } = parse(data);
-    const stateWatcher = genStateWatcher(state, t);
 
     state.links.push(link);
     stateWatcher.feed.push(feed);
     stateWatcher.formState = 'success';
     stateWatcher.posts = posts.concat(stateWatcher.posts);
 
-    if (state.links.length === 1) {
-      setTimeout(() => {
-        updatePosts();
-      }, 5000);
-    }
+    setPostHandlers(stateWatcher);
   };
 
   const getDataContents = (link) => {
-    const stateWatcher = genStateWatcher(state, t);
-
     getData(link).then((data) => {
       const contents = checkForXmlData(data);
 
       if (contents) updateState(link, contents);
-      else stateWatcher.formState = 'noRss';
     })
       .catch((err) => {
-        console.log(err);
-        stateWatcher.formState = 'networkError';
+        console.error(t(`errors.${err.message}`));
+        stateWatcher.formState = err.message;
       });
   };
 
-  const validateLink = (link) => {
-    const stateWatcher = genStateWatcher(state, t);
+  const checkLinkAndFetch = (link) => {
     const linkScheme = yup.string().url().required().notOneOf(state.links);
 
     stateWatcher.formState = 'sending';
@@ -116,8 +73,10 @@ const app = (t) => {
 
     const formData = new FormData(form);
 
-    validateLink(formData.get('url'));
+    checkLinkAndFetch(formData.get('url'));
   });
+
+  updatePosts(stateWatcher, t);
 };
 
 export default app;

@@ -1,26 +1,27 @@
 {
   "form": {
-    "title": "RSS агрегатор",
-    "descr": "Начните читать RSS сегодня! Это легко, это красиво.",
     "button": "Добавить",
+    "title": "RSS агрегатор",
     "placeholder": "ссылка RSS",
-    "example": "Пример: https://lorem-rss.hexlet.app/feed"
+    "example": "Пример: https://lorem-rss.hexlet.app/feed",
+    "descr": "Начните читать RSS сегодня! Это легко, это красиво."
   },
   "errors": {
-    "success": "RSS успешно загружен",
     "networkError": "Ошибка сети",
-    "invalid": "Ссылка должна быть валидным URL",
-    "noRss": "Ресурс не содержит валидный RSS",
     "empty": "Не должно быть пустым",
-    "alreadyExist": "RSS уже существует"
+    "success": "RSS успешно загружен",
+    "alreadyExist": "RSS уже существует",
+    "noResponse": "Не удалось получить ответ",
+    "noRss": "Ресурс не содержит валидный RSS",
+    "invalid": "Ссылка должна быть валидным URL"
   },
   "modal": {
-    "readMore": "Читать полностью",
-    "close": "Закрыть"
+    "close": "Закрыть",
+    "readMore": "Читать полностью"
   },
   "mainContent": {
+    "feedTitle": "Фиды",
     "button": "Просмотр",
-    "postsTitle": "Посты",
-    "feedTitle": "Фиды"
+    "postsTitle": "Посты"
   }
 }

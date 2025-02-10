@@ -25,33 +25,16 @@ const createPostBtn = (id, text) => {
   return btn;
 };
 
-const genPosts = (genStateWatcher, state, t) => {
-  const { posts, modal } = state;
+const genPosts = (state, t) => {
   const list = genList();
-  const stateWatcher = genStateWatcher(state, t);
   const postsCard = genCard(t('mainContent.postsTitle'));
   const postsContainer = document.querySelector('.posts');
 
-  posts.forEach((post) => {
-    const {
-      id, title, descr, link,
-    } = post;
+  state.posts.forEach((post) => {
+    const { id, title, link } = post;
     const linkEl = createPostLink(id, title, link);
     const btn = createPostBtn(id, t('mainContent.button'));
     const item = genLi();
-
-    linkEl.addEventListener('click', () => {
-      stateWatcher.visitedPostsId.push(id);
-    });
-
-    btn.addEventListener('click', () => {
-      const text = descr.replace(/<(\/?[^>]+)>/g, '');
-
-      modal.descr = text;
-      modal.title = title;
-      stateWatcher.modal.link = link;
-      stateWatcher.visitedPostsId.push(btn.dataset.id);
-    });
 
     item.classList.add('d-flex', 'justify-content-between', 'align-items-start');
     item.append(linkEl, btn);

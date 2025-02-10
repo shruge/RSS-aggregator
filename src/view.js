@@ -1,6 +1,7 @@
 import onChange from 'on-change';
 import genFeed from './components/genFeed.js';
 import genPosts from './components/genPosts.js';
+import { updateFeedback } from './utils/helpers.js';
 
 const markPost = (psotIds) => {
   psotIds.forEach((id) => {
@@ -17,17 +18,7 @@ const updateModal = ({ title, descr, link }) => {
   document.querySelector('.modal-body').textContent = descr;
 };
 
-const updateFeedback = (btn, input, feedbackEl, errorType = 'error') => {
-  btn.removeAttribute('disabled');
-
-  input.removeAttribute('readonly');
-  input.classList.toggle('is-invalid', errorType === 'invalid');
-
-  feedbackEl.classList.toggle('text-danger', errorType !== 'noError');
-  feedbackEl.classList.toggle('text-success', errorType === 'noError');
-};
-
-const changeFormState = (formState, t) => {
+const renderFormState = (formState, t) => {
   const input = document.querySelector('#url-input');
   const btn = document.querySelector('.rss-form button');
   const feedbackEl = document.querySelector('.feedback');
@@ -68,14 +59,14 @@ const genStateWatcher = (state, t) => {
         updateModal(state.modal);
         break;
       case 'posts':
-        genPosts(genStateWatcher, state, t);
+        genPosts(state, t);
         markPost(state.visitedPostsId);
         break;
       case 'feed':
         genFeed(state.feed, t);
         break;
       case 'formState':
-        changeFormState(state.formState, t);
+        renderFormState(state.formState, t);
         break;
       default: break;
     }

@@ -5,7 +5,9 @@ import ru from './langs/ru.json';
 import en from './langs/en.json';
 import app from './app.js';
 
-i18next.createInstance({
+const i18nInstance = i18next.createInstance();
+
+i18nInstance.init({
   lng: 'ru',
   resources: {
     en: { translation: en },
