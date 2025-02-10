@@ -46,7 +46,7 @@ export default [
         'error',
         {
           js: 'always',
-          json: 'never',
+          json: 'always',
         },
       ],
       'import/no-named-as-default': 'off',
